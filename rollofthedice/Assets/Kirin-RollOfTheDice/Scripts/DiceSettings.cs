@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Kirin_RollOfTheDice.Scripts.Enumerations;
 using UnityEngine;
 
 namespace Kirin_RollOfTheDice.Scripts
@@ -20,11 +21,12 @@ namespace Kirin_RollOfTheDice.Scripts
         [SerializeField] private EFaceType _type;
         
         [SerializeField] private int _value;
-        [SerializeField] private EEffect _effect;
+        [SerializeField] private DiceEffects _effect;
         [SerializeField] private Sprite _sprite;
 
+        public EFaceType Type => _type;
         public int Value => _value;
-        public EEffect Effect => _effect;
+        public DiceEffects Effect => _effect;
         public Sprite Sprite => _sprite;
 
         public enum EFaceType

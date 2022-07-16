@@ -1,76 +1,60 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Kirin_RollOfTheDice.Scripts
 {
     public class Dice : MonoBehaviour
     {
         [SerializeField] private DiceSettings _diceSettings;
-        
-        [SerializeField] private int _dimensions = 6;
-        [SerializeField] private int _maxEffects = 1;
-        [SerializeField] private bool _generateEffects = false;
-        [SerializeField, Range(0f, 1f)] private float _effectChance = 0.33f;
+        [SerializeField] private int _dimensions;
 
-
-        [Header("Result")] 
         [SerializeField] private GameObject _result;
-        [SerializeField] private SpriteRenderer _spriteRenderer;
+        [SerializeField] private Image _resultSprite;
 
-        [Header("Unwrap")] 
         [SerializeField] private GameObject _unwrap;
-        [SerializeField] private List<SpriteRenderer> _spriteRenderers;
-        
-        
+        [SerializeField] private List<Image> _unwrapSprites;
+
         private List<Face> _faces;
-        private int _effectCount;
+
+        public Face Result
+        {
+            get; private set;
+        }
 
         public void Generate()
         {
-            _faces?.Clear();
             _faces = new List<Face>(_dimensions);
-            _effectCount = 0;
-            
-            var faces = _diceSettings.DigitFaces; 
-            
-            for (var i = 0; i < _dimensions / 2; i++)
+
+            for (int i = 0, j = _dimensions / 2; i < _dimensions / 2; i++, j++)
             {
-                var face = faces.GetRandomItem();
-                _faces[i] = face;
-                _spriteRenderers[i].sprite = face.Sprite;
-
-                var otherIndex = i + _dimensions / 2;
-                var otherValue = faces.Count - face.Value;
-                var otherFace = faces.Find(item => item.Value == otherValue);
-                _faces[otherIndex] = otherFace;
-                _spriteRenderers[otherIndex].sprite = face.Sprite;
+                _faces[i] = _diceSettings.DigitFaces.GetRandomItem();
+                
+                _faces[j] = _diceSettings.DigitFaces.Find(item =>
+                    item.Value == (_diceSettings.DigitFaces.Count + 1) - _faces[i].Value);
+                
+                _unwrapSprites[i].sprite = _faces[i].Sprite;
+                _unwrapSprites[j].sprite = _faces[j].Sprite;
             }
+        }
 
-            if (!_generateEffects || !(Random.Range(0, 1) < _effectChance))
-                return;
-            
-            var index = _faces.GetRandomIndex();
-            _faces[index] = _diceSettings.EffectFaces.GetRandomItem();
-            
-            _effectCount = 1;
+        public void GetResult()
+        {
+            Result = _faces.GetRandomItem();
+            _result.SetActive(true);
+            _unwrap.SetActive(false);
         }
 
         public void Unwrap()
         {
             _result.SetActive(false);
-            _unwrap.SetActive(true);
+            _unwrap.SetActive(true);    
+        }
+
+        public void Spend(int usageCost = 1)
+        {
+            Result = _diceSettings.DigitFaces.Find(item => item.Value == Result.Value - usageCost);
         }
         
-        public Face GetRandom()
-        {
-            var face = _faces.GetRandomItem();
-
-            _spriteRenderer.sprite = face.Sprite;
-            
-            _result.SetActive(true);
-            _unwrap.SetActive(false);
-            
-            return face;
-        }
     }
 }
